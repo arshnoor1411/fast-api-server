@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func
+from fastapi import Depends, FastAPI, HTTPException
 
 
 # def get_session():
@@ -19,6 +20,8 @@ from sqlalchemy import func
 # print("App",app)
 
 router = APIRouter()
+
+# app = FastAPI()
 
 @router.post("/signup")
 def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
