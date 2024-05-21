@@ -24,7 +24,7 @@ router = APIRouter()
 # app = FastAPI()
 
 @router.post("/signup")
-def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
+async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
     print("User",user)
     existing_user = db.query(models.User).filter_by(email = user.email).first
 
@@ -36,8 +36,8 @@ def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
     new_user = models.User(firstname = user.firstname,lastname = user.lastname, email = user.email, password = hashPassword, createdAt = func.now(), updatedAt = func.now(), deletedAt = func.now())
 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
 
     return {"message":"User Created Successfully"}
 
