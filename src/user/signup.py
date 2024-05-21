@@ -3,22 +3,15 @@ from database import models
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException,status
-from sqlalchemy.orm import Session
 from database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, HTTPException
 from sqlalchemy.future import select
+from passlib.context import CryptContext
+import src.auth.token
 
 
-# def get_session():
-#     session = SessionLocal()
-#     try:
-#         yield session
-#     finally:
-#         session.close()
-# app=FastAPI()
-# print("App",app)
 
 router = APIRouter()
 
@@ -47,6 +40,35 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail="Email already registered")
+    
+@router.get("/login")
+async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db)):
+    try:
+        user = await db.execute(select(models.User).filter_by(email = request.email))
+        existing_user = user.scalar_one_or_none()
+        #  print("USer",existing_user.password)
+
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email")
+        
+        password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        print("Hello")
+
+        verify_user = password_context.verify(request.password, existing_user.password)
+        print("Verify",verify_user)
+
+        if not verify_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect password"
+            )
+        
+        token = await src.auth.token.sign_jwt(data={"sub": str(existing_user.id),"name": str(existing_user.firstname)})
+
+        return token
+     
+    except Exception as e:
+     await db.rollback()
         
 
 @router.get("/get")
