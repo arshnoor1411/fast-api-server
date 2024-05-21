@@ -47,16 +47,13 @@ async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db))
     try:
         user = await db.execute(select(models.User).filter_by(email = request.email))
         existing_user = user.scalar_one_or_none()
-        #  print("USer",existing_user.password)
 
         if user is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email")
         
         password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        print("Hello")
 
         verify_user = password_context.verify(request.password, existing_user.password)
-        print("Verify",verify_user)
 
         if not verify_user:
             raise HTTPException(
