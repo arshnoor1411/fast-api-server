@@ -41,6 +41,7 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
         await db.rollback()
         raise HTTPException(status_code=500, detail="Email already registered")
     
+    
 @router.get("/login")
 async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db)):
     try:
