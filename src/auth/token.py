@@ -11,14 +11,18 @@ async def sign_jwt(data: dict, expires_delta: timedelta | None = None):
 
         to_encode = data.copy()
         print(to_encode, expires_delta, datetime.now(),timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+
         if expires_delta:
             expire = datetime.now() + expires_delta
         else:
             expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": int(expire.timestamp())})
+
+        print("TO_ENCODE",to_encode)
 
         encoded_jwt = jwt.encode(payload = to_encode, key=JWT_SECRET_KEY, algorithm=ALGORITHM)
+        
         return encoded_jwt
     
     except Exception as e:
