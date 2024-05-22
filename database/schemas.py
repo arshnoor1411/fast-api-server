@@ -13,6 +13,7 @@ class SignUp(SignUpModel):
     createdAt: datetime
     updatedAt: datetime
     deletedAt: datetime
+    otp: int
 
 class SignInModel(BaseModel):
     email: str
@@ -22,3 +23,7 @@ class TokenCreate(BaseModel):
     user_id: str
     access_token: str
     created_date: datetime
+
+class VerifyEmail(BaseModel):
+    email: str
+    otp: int
