@@ -9,15 +9,18 @@ from sqlalchemy import func
 from fastapi import Depends, HTTPException
 from sqlalchemy.future import select
 from passlib.context import CryptContext
+import src.auth.current_user
 import src.auth.token
 import src.utils.utils 
 import src.utils.sendgrid
-
-
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
 
 router = APIRouter()
 
 # app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/signup")
 async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
@@ -83,7 +86,7 @@ async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db))
                 detail="Incorrect password"
             )
         
-        token = await src.auth.token.sign_jwt(data={"sub": str(existing_user.id),"name": str(existing_user.firstname)})
+        token = await src.auth.token.sign_jwt(data={"sub": str(existing_user.email),"name": str(existing_user.firstname)})
 
         return token
      
@@ -92,5 +95,5 @@ async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db))
         
 
 @router.get("/get")
-def getWorld():
-    return "Hello World"
+def get_user_by_id(current_user: models.User = Depends(src.auth.current_user.get_current_user),db: AsyncSession = Depends(get_db)):
+    return current_user.id
