@@ -12,6 +12,7 @@ class User(Base):
     lastname = Column(String, index = True)
     email = Column(String, unique = True, index = True)
     password = Column(String, index = True)
+    otp = Column(Integer, index = True)
     createdAt =  Column(Date, server_default = func.now())
     updatedAt =  Column(Date, server_default = func.now(), onupdate = func.now())
     deletedAt =  Column(Date, server_default = func.now())
