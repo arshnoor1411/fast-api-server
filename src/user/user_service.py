@@ -1,4 +1,4 @@
-import schemas
+import database.schemas as schemas
 from database import models
 
 import bcrypt
@@ -10,6 +10,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.future import select
 from passlib.context import CryptContext
 import src.auth.token
+import src.utils.utils
 
 
 
@@ -30,7 +31,9 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
         hashPassword = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
         stringHashPassword = hashPassword.decode('utf-8')
 
-        new_user = models.User(firstname = user.firstname,lastname = user.lastname, email = user.email, password = stringHashPassword, createdAt = func.now(), updatedAt = func.now(), deletedAt = func.now())
+        generateOtp = await src.utils.utils.generate_otp()
+
+        new_user = models.User(firstname = user.firstname,lastname = user.lastname, email = user.email, password = stringHashPassword, otp = int(generateOtp), createdAt = func.now(), updatedAt = func.now(), deletedAt = func.now())
 
         db.add(new_user)
         await db.commit()
@@ -39,8 +42,24 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
         return {"message":"User Created Successfully"}
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Email already registered")
+        raise HTTPException(status_code=500, detail=e)
     
+
+@router.post("/verify-email")
+async def verify_email(user: schemas.VerifyEmail, db: AsyncSession = Depends(get_db)):
+    try:
+      existing_user = await db.execute(select(models.User).filter_by(email=user.email))
+      result = existing_user.scalar_one_or_none()
+      print(existing_user)
+
+      if user.otp != result.otp:
+          return "OTP is Incorrect"
+      
+      return "OTP has been verified"
+
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Email already registered")
     
 @router.get("/login")
 async def login(request:schemas.SignInModel, db: AsyncSession = Depends(get_db)):
