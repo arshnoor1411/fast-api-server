@@ -36,10 +36,8 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
 
         new_user = models.User(firstname = user.firstname,lastname = user.lastname, email = user.email, password = stringHashPassword, otp = int(generateOtp), createdAt = func.now(), updatedAt = func.now(), deletedAt = func.now())
 
-        print("USER", new_user)
         await src.utils.sendgrid.send_email(user.email, int(generateOtp))
 
-        print("After emial")
         db.add(new_user)
         await db.commit()
         await db.refresh(new_user)
