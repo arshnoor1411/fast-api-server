@@ -26,7 +26,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
     try:
         existing_user = await db.execute(select(models.User).filter_by(email=user.email))
-
+    
         # if existing_user:
         #   raise HTTPException(status_code=400, detail="Email already registered")
         
