@@ -18,8 +18,6 @@ from typing import Annotated
 
 router = APIRouter()
 
-# app = FastAPI()
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/signup")
