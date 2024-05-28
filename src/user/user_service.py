@@ -40,7 +40,7 @@ async def signup(user: schemas.SignUpModel, db: AsyncSession = Depends(get_db)):
         await src.utils.sendgrid.send_email(user.email, int(generateOtp))
 
         db.add(new_user)
-        await db.commit()
+        await db.commit()   
         await db.refresh(new_user)
 
         return {"message":"User Created Successfully"}
