@@ -5,6 +5,8 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 Base = declarative_base()
 
+target_metadata = Base.metadata
+
 class User(Base):
     __tablename__ = "users"
     id = Column(PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
